@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CD Lab</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .mainContainer {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .expContainer {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+            position: relative;
+        }
+
+        .expContainer h3 {
+            margin: 0 0 15px;
+            color: #007bff;
+        }
+
+        pre {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .copy-btn:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 768px) {
+            .mainContainer {
+                padding: 10px;
+            }
+
+            .expContainer {
+                padding: 15px;
+            }
+
+            .copy-btn {
+                top: 10px;
+                right: 10px;
+                padding: 6px 10px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mainContainer">
+        <div class="expContainer">
+            <h3>Exp1- Token separator</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+#define MAX 100
+
+const char *keywords[] = {"void", "int", "float", "char"};
+int num_keywords = 4;
+
+int isKeyword(char *word) {
+    for (int i = 0; i &lt; num_keywords; i++) {
+        if (strcmp(word, keywords[i]) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+int isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '=' || ch == '%';
+}
+
+int main() {
+    char input[MAX], word[20];
+    int i = 0, j = 0;
+
+    printf("Enter code: ");
+    fgets(input, sizeof(input), stdin);
+
+    while (input[i] != '\0') {
+        if (isalnum(input[i]) || input[i] == '.') {
+            word[j++] = input[i];
+        } else {
+            if (j &gt; 0) {
+                word[j] = '\0';
+                // Check if it's a number
+                int isConstant = 1;
+                for (int k = 0; k &lt; j; k++) {
+                    if (!isdigit(word[k]) &amp;&amp; word[k] != '.') {
+                        isConstant = 0;
+                        break;
+                    }
+                }
+
+                if (isConstant)
+                    printf("%s is a constant\n", word);
+                else if (isKeyword(word))
+                    printf("%s is a keyword\n", word);
+                else
+                    printf("%s is an identifier\n", word);
+
+                j = 0;
+            }
+
+            if (isOperator(input[i])) {
+                printf("%c is an operator\n", input[i]);
+            } else if (strchr(";(){}", input[i])) {
+                printf("%c is a delimiter\n", input[i]);
+            }
+        }
+        i++;
+    }
+
+    return 0;
+}
+            </pre>
+        </div>
+        <div class="expContainer">
+            <h3>Exp2 - NFA from RE</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main() {
+    char reg[20];
+    int q[20][3], i = 0, j = 1, len, a, b;
+
+    // Initialize transition table
+    for (a = 0; a &lt; 20; a++)
+        for (b = 0; b &lt; 3; b++)
+            q[a][b] = 0;
+
+    // Read the regular expression
+    scanf("%s", reg);
+    printf("Given regular expression: %s\n", reg);
+
+    len = strlen(reg);
+
+    while (i &lt; len) {
+        // Case: a (single character transition)
+        if (reg[i] == 'a' &amp;&amp; reg[i + 1] != '|' &amp;&amp; reg[i + 1] != '*') {
+            q[j][0] = j + 1;
+            j++;
+        }
+
+        // Case: b (single character transition)
+        if (reg[i] == 'b' &amp;&amp; reg[i + 1] != '|' &amp;&amp; reg[i + 1] != '*') {
+            q[j][1] = j + 1;
+            j++;
+        }
+
+        // Case: e (epsilon transition)
+        if (reg[i] == 'e' &amp;&amp; reg[i + 1] != '|' &amp;&amp; reg[i + 1] != '*') {
+            q[j][2] = j + 1;
+            j++;
+        }
+
+        // Case: a|b
+        if (reg[i] == 'a' &amp;&amp; reg[i + 1] == '|' &amp;&amp; reg[i + 2] == 'b') {
+            q[j][2] = ((j + 1) * 10) + (j + 3); j++;
+            q[j][0] = j + 1; j++;
+            q[j][2] = j + 3; j++;
+            q[j][1] = j + 1; j++;
+            q[j][2] = j + 1; j++;
+            i += 2;
+        }
+
+        // Case: b|a
+        if (reg[i] == 'b' &amp;&amp; reg[i + 1] == '|' &amp;&amp; reg[i + 2] == 'a') {
+            q[j][2] = ((j + 1) * 10) + (j + 3); j++;
+            q[j][1] = j + 1; j++;
+            q[j][2] = j + 3; j++;
+            q[j][0] = j + 1; j++;
+            q[j][2] = j + 1; j++;
+            i += 2;
+        }
+
+        // Case: a*
+        if (reg[i] == 'a' &amp;&amp; reg[i + 1] == '*') {
+            q[j][2] = ((j + 1) * 10) + (j + 3); j++;
+            q[j][0] = j + 1; j++;
+            q[j][2] = ((j + 1) * 10) + (j - 1); j++;
+        }
+
+        // Case: b*
+        if (reg[i] == 'b' &amp;&amp; reg[i + 1] == '*') {
+            q[j][2] = ((j + 1) * 10) + (j + 3); j++;
+            q[j][1] = j + 1; j++;
+            q[j][2] = ((j + 1) * 10) + (j - 1); j++;
+        }
+
+        // Case: ( )* -&gt; closure
+        if (reg[i] == ')' &amp;&amp; reg[i + 1] == '*') {
+            q[0][2] = ((j + 1) * 10) + 1;
+            q[j][2] = ((j + 1) * 10) + 1;
+            j++;
+        }
+
+        i++;
+    }
+
+    // Print transition table
+    printf("\n\tTransition Table\n");
+    printf("_\n");
+    printf("Current State |\tInput |\tNext State\n");
+    printf("_\n");
+
+    for (i = 0; i &lt;= j; i++) {
+        if (q[i][0] != 0)
+            printf("\n  q[%d]\t      |   a   |  q[%d]", i, q[i][0]);
+        if (q[i][1] != 0)
+            printf("\n  q[%d]\t      |   b   |  q[%d]", i, q[i][1]);
+        if (q[i][2] != 0) {
+            if (q[i][2] &lt; 10)
+                printf("\n  q[%d]\t      |   e   |  q[%d]", i, q[i][2]);
+            else
+                printf("\n  q[%d]\t      |   e   |  q[%d] , q[%d]", i, q[i][2] / 10, q[i][2] % 10);
+        }
+    }
+
+    printf("\n_\n");
+    return 0;
+}
+            </pre>
+        </div>
+        <div class="expContainer">
+            <h3>Exp3- First and Follow</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+#define MAX 10
+
+char prod[MAX][10];
+int n;
+
+char firstSet[26][10], followSet[26][10]; // A-Z -> 0-25
+
+void add(char* set, char val) {
+    if (strchr(set, val) == NULL) {
+        int len = strlen(set);
+        set[len] = val;
+        set[len + 1] = '\0';
+    }
+}
+
+void findFirst(char nonTerm, char* result) {
+    for (int i = 0; i &lt; n; i++) {
+        if (prod[i][0] == nonTerm) {
+            char rhs = prod[i][3];
+            if (!isupper(rhs)) {
+                add(result, rhs);
+            } else {
+                char temp[10] = "";
+                findFirst(rhs, temp);
+                for (int k = 0; temp[k]; k++)
+                    add(result, temp[k]);
+            }
+        }
+    }
+}
+
+void findFollow(char nonTerm, char* result) {
+    if (nonTerm == prod[0][0]) add(result, '$');
+
+    for (int i = 0; i &lt; n; i++) {
+        char* rhs = strchr(prod[i], '&gt;') + 1;
+        for (int j = 0; rhs[j]; j++) {
+            if (rhs[j] == nonTerm) {
+                if (rhs[j + 1] != '\0') {
+                    char next = rhs[j + 1];
+                    if (!isupper(next)) {
+                        add(result, next);
+                    } else {
+                        char temp[10] = "";
+                        findFirst(next, temp);
+                        for (int k = 0; temp[k]; k++) {
+                            if (temp[k] != 'e') add(result, temp[k]);
+                        }
+                    }
+                } else {
+                    if (nonTerm != prod[i][0]) {
+                        char temp[10] = "";
+                        findFollow(prod[i][0], temp);
+                        for (int k = 0; temp[k]; k++) add(result, temp[k]);
+                    }
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    printf("Enter number of productions: ");
+    scanf("%d", &amp;n);
+
+    printf("Enter productions (e.g. E-&gt;Te, T-&gt;e):\n");
+    for (int i = 0; i &lt; n; i++) {
+        scanf("%s", prod[i]);
+    }
+
+    for (int i = 0; i &lt; n; i++) {
+        char nt = prod[i][0];
+        if (firstSet[nt - 'A'][0] == '\0')
+            findFirst(nt, firstSet[nt - 'A']);
+
+        if (followSet[nt - 'A'][0] == '\0')
+            findFollow(nt, followSet[nt - 'A']);
+    }
+
+    printf("\nFIRST sets:\n");
+    for (int i = 0; i &lt; n; i++) {
+        char nt = prod[i][0];
+        printf("FIRST(%c) = { ", nt);
+        for (int j = 0; firstSet[nt - 'A'][j]; j++)
+            printf("%c ", firstSet[nt - 'A'][j]);
+        printf("}\n");
+    }
+
+    printf("\nFOLLOW sets:\n");
+    for (int i = 0; i &lt; n; i++) {
+        char nt = prod[i][0];
+        printf("FOLLOW(%c) = { ", nt);
+        for (int j = 0; followSet[nt - 'A'][j]; j++)
+            printf("%c ", followSet[nt - 'A'][j]);
+        printf("}\n");
+    }
+
+    return 0;
+}
+            </pre>
+        </div>
+        <div class="expContainer">
+            <h3>Exp4- Calculate E-closure</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+                #include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+#define MAX_STATES 10
+
+int nfa[MAX_STATES][MAX_STATES]; // epsilon transitions matrix
+int visited[MAX_STATES];
+
+// Recursive function to find epsilon closure
+void epsilonClosure(int state, int closure[], int n) {
+    visited[state] = 1;
+    closure[state] = 1;
+
+    for (int i = 0; i &lt; n; i++) {
+        if (nfa[state][i] &amp;&amp; !visited[i]) {
+            epsilonClosure(i, closure, n);
+        }
+    }
+}
+
+int main() {
+    int n, trans, from, to;
+    char symbol;
+
+    printf("Enter number of states: ");
+    scanf("%d", &amp;n);
+
+    // Initialize transition table
+    memset(nfa, 0, sizeof(nfa));
+
+    printf("Enter number of transitions: ");
+    scanf("%d", &amp;trans);
+
+    printf("Enter transitions (from to symbol):\n");
+    for (int i = 0; i &lt; trans; i++) {
+        scanf("%d %d %c", &amp;from, &amp;to, &amp;symbol);
+        if (symbol == 'e') {
+            nfa[from][to] = 1;  // only storing epsilon transitions
+        }
+    }
+
+    // Compute epsilon closure for all states
+    for (int i = 0; i &lt; n; i++) {
+        int closure[MAX_STATES] = {0};
+        memset(visited, 0, sizeof(visited));
+
+        epsilonClosure(i, closure, n);
+
+        printf("Epsilon closure of q%d: {", i);
+        int first = 1;
+        for (int j = 0; j &lt; n; j++) {
+            if (closure[j]) {
+                if (!first) printf(", ");
+                printf("q%d", j);
+                first = 0;
+            }
+        }
+        printf("}\n");
+    }
+
+    return 0;
+}
+
+            </pre>
+        </div>
+        
+        <div class="expContainer">
+            <h3>Exp5- Predictive Parser</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#define MAX 100
+
+char production[MAX][MAX];
+char first[MAX][MAX];
+char follow[MAX][MAX];
+char nonTerminals[MAX];
+char terminals[MAX];
+char parsingTable[MAX][MAX][MAX];
+
+int ntCount = 0;
+int termCount = 0;
+int prodCount = 0;
+
+void addChar(char c, char *result) {
+    if (!strchr(result, c)) {
+        int len = strlen(result);
+        result[len] = c;
+        result[len + 1] = '\0';
+    }
+}
+
+void addTerminal(char c) {
+    if (!strchr(terminals, c) && c != '#' && !(c >= 'A' && c <= 'Z')) {
+        terminals[termCount++] = c;
+    }
+}
+
+int isNonTerminal(int c) {
+    return (c >= 65 && c <= 90);
+}
+
+void computeFirst(char c, char *result) {
+    if (!isNonTerminal(c)) {
+        addChar(c, result);
+        addTerminal(c); // collect terminals
+        return;
+    }
+
+    for (int i = 0; i < prodCount; i++) {
+        if (production[i][0] == c) {
+            char *rhs = production[i] + 3;
+            if (rhs[0] == '#') {
+                addChar('#', result);
+            } else {
+                int j = 0;
+                while (rhs[j]) {
+                    char temp[MAX] = "";
+                    computeFirst(rhs[j], temp);
+
+                    for (int k = 0; temp[k]; k++) {
+                        if (temp[k] != '#') {
+                            addChar(temp[k], result);
+                        }
+                    }
+
+                    if (!strchr(temp, '#'))
+                        break;
+
+                    j++;
+                    if (!rhs[j]) {
+                        addChar('#', result);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void computeFollow(char c, char *result) {
+    if (production[0][0] == c) {
+        addChar('$', result);
+    }
+
+    for (int i = 0; i < prodCount; i++) {
+        char *rhs = production[i] + 3;
+        int j = 0;
+        while (rhs[j]) {
+            if (rhs[j] == c) {
+                if (rhs[j + 1]) {
+                    char temp[MAX] = "";
+                    computeFirst(rhs[j + 1], temp);
+
+                    for (int k = 0; temp[k]; k++) {
+                        if (temp[k] != '#') {
+                            addChar(temp[k], result);
+                        }
+                    }
+
+                    if (strchr(temp, '#') && production[i][0] != c) {
+                        computeFollow(production[i][0], result);
+                    }
+                } else {
+                    if (production[i][0] != c) {
+                        computeFollow(production[i][0], result);
+                    }
+                }
+            }
+            j++;
+        }
+    }
+}
+
+void createParsingTable() {
+    for (int i = 0; i < prodCount; i++) {
+        char nt = production[i][0];
+        char *rhs = production[i] + 3;
+        char tempFirst[MAX] = "";
+        computeFirst(rhs[0], tempFirst);
+
+        for (int k = 0; tempFirst[k]; k++) {
+            if (tempFirst[k] != '#') {
+                int row = strchr(nonTerminals, nt) - nonTerminals;
+                int col = strchr(terminals, tempFirst[k]) - terminals;
+                strcpy(parsingTable[row][col], production[i]);
+            }
+        }
+
+        if (strchr(tempFirst, '#')) {
+            char tempFollow[MAX] = "";
+            computeFollow(nt, tempFollow);
+            for (int k = 0; tempFollow[k]; k++) {
+                int row = strchr(nonTerminals, nt) - nonTerminals;
+                int col = strchr(terminals, tempFollow[k]) - terminals;
+                strcpy(parsingTable[row][col], production[i]);
+            }
+        }
+    }
+}
+
+void displayParsingTable() {
+    printf("\nPredictive Parsing Table:\n\n");
+    printf("%10s", "");
+    for (int j = 0; j < termCount; j++) {
+        printf("%10c", terminals[j]);
+    }
+    printf("\n");
+
+    for (int i = 0; i < ntCount; i++) {
+        printf("%10c", nonTerminals[i]);
+        for (int j = 0; j < termCount; j++) {
+            if (strlen(parsingTable[i][j]) > 0)
+                printf("%10s", parsingTable[i][j]);
+            else
+                printf("%10s", "-");
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    printf("Enter no.of.production: ");
+    scanf("%d", &prodCount);
+    getchar();
+
+    for (int i = 0; i < prodCount; i++) {
+        printf("Enter production %d (like A->aB): ", i + 1);
+        fgets(production[i], sizeof(production[i]), stdin);
+        production[i][strcspn(production[i], "\n")] = '\0';
+
+        if (!strchr(nonTerminals, production[i][0])) {
+            nonTerminals[ntCount++] = production[i][0];
+        }
+    }
+
+    printf("First Sets:\n");
+    for (int i = 0; i < ntCount; i++) {
+        first[i][0] = '\0';
+        computeFirst(nonTerminals[i], first[i]);
+        printf("FIRST(%c) = { ", nonTerminals[i]);
+        for (int j = 0; first[i][j]; j++) {
+            printf("%c ", first[i][j]);
+        }
+        printf("}\n");
+    }
+
+    printf("Follow Sets:\n");
+    for (int i = 0; i < ntCount; i++) {
+        follow[i][0] = '\0';
+        computeFollow(nonTerminals[i], follow[i]);
+        printf("FOLLOW(%c) = { ", nonTerminals[i]);
+        for (int j = 0; follow[i][j]; j++) {
+            printf("%c ", follow[i][j]);
+        }
+        printf("}\n");
+    }
+
+    addTerminal('$');
+    createParsingTable();
+    displayParsingTable();
+
+    return 0;
+}
+            </pre>
+        </div>
+        <div class="expContainer">
+            <h3>Exp6- Three Address Code Generator(TAC)</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+#include &lt;stdio.h&gt;
+#include &lt;ctype.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define MAX 100
+
+char stack[MAX][10]; // Stack to store intermediate results
+int top = -1;
+int tempVarCount = 1;
+
+// Function to return precedence of operators
+int precedence(char op) {
+    switch(op) {
+        case '+':
+        case '-': return 1;
+        case '*':
+        case '/': return 2;
+        default: return 0;
+    }
+}
+
+// Function to convert infix to postfix
+void infixToPostfix(char infix[], char postfix[]) {
+    char stack[MAX];
+    int top = -1;
+    int j = 0;
+    for (int i = 0; infix[i] != '#' &amp;&amp; infix[i] != '\0'; i++) {
+        char ch = infix[i];
+        if (isalnum(ch)) {
+            postfix[j++] = ch;
+        } else if (ch == '(') {
+            stack[++top] = ch;
+        } else if (ch == ')') {
+            while (top != -1 &amp;&amp; stack[top] != '(') {
+                postfix[j++] = stack[top--];
+            }
+            top--; // pop '('
+        } else { // Operator
+            while (top != -1 &amp;&amp; precedence(stack[top]) &gt;= precedence(ch)) {
+                postfix[j++] = stack[top--];
+            }
+            stack[++top] = ch;
+        }
+    }
+
+    while (top != -1) {
+        postfix[j++] = stack[top--];
+    }
+
+    postfix[j] = '\0';
+}
+
+// Function to generate three address code from postfix
+void generateTAC(char postfix[]) {
+    for (int i = 0; postfix[i] != '\0'; i++) {
+        char ch = postfix[i];
+        if (isalnum(ch)) {
+            char operand[2] = {ch, '\0'};
+            strcpy(stack[++top], operand);
+        } else { // Operator
+            char op2[10], op1[10], result[10];
+            strcpy(op2, stack[top--]);
+            strcpy(op1, stack[top--]);
+            sprintf(result, "t%d", tempVarCount++);
+            printf("%s = %s %c %s\n", result, op1, ch, op2);
+            strcpy(stack[++top], result);
+        }
+    }
+}
+
+int main() {
+    char infix[MAX], postfix[MAX];
+    printf("Enter an expression: ");
+    scanf("%s", infix);
+
+    infixToPostfix(infix, postfix);
+    printf("\nThree Address Code:\n");
+    generateTAC(postfix);
+
+    return 0;
+}
+       </pre>
+        </div>
+        <div class="expContainer">
+            <h3>Exp7- Optimization</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+
+void optimizeStrengthReduction(char* expr) {
+    char var[10], op1[10], op2[10];
+    if (sscanf(expr, "%s = %s * %s", var, op1, op2) == 3) {
+        if (strcmp(op1, var) == 0 && strcmp(op2, "2") == 0) {
+            sprintf(expr, "%s = %s + %s", var, op1, op1);
+            printf("Optimized (strength reduction): %s\n", expr);
+            return;
+        }
+    }
+    printf("No strength reduction applied.\n");
+}
+
+int optimize(char* expr) {
+    char var[10], op1[10], op2[10];
+    if (sscanf(expr, "%s = %s + %s", var, op1, op2) == 3) {
+        if (strcmp(var, op1) == 0 && strcmp(op2, "0") == 0) {
+            sprintf(expr, "%s = %s", var, op1);
+            printf("Optimized (add zero removal): %s\n", expr);
+            return 1;
+        }
+    }
+    else if (sscanf(expr, "%s = %s * %s", var, op1, op2) == 3) {
+        if (strcmp(var, op1) == 0 && strcmp(op2, "1") == 0) {
+            sprintf(expr, "%s = %s", var, op1);
+            printf("Optimized: %s\n", expr);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int optimizeConstantFoldOperator(char* expr) {
+    int lhs, rhs;
+    char var[10];
+    char op;
+
+    if (sscanf(expr, "%s = %d %c %d", var, &lhs, &op, &rhs) == 4) {
+        int result;
+        switch (op) {
+            case '+': result = lhs + rhs; break;
+            case '-': result = lhs - rhs; break;
+            case '*': result = lhs * rhs; break;
+            case '/':
+                if (rhs == 0) {
+                    printf("Error: Division by zero\n");
+                    return 0;
+                }
+                result = lhs / rhs;
+                break;
+            default:
+                return 0;
+        }
+        sprintf(expr, "%s = %d", var, result);
+        printf("Optimized (constant folding): %s\n", expr);
+        return 1;
+    }
+    return 0;
+}
+
+int main() {
+    char expr[100];
+
+    printf("Enter expressions to optimize (type 'exit' to quit):\n");
+
+    while (1) {
+        printf("\n> ");
+        fgets(expr, sizeof(expr), stdin);
+
+        expr[strcspn(expr, "\n")] = '\0';
+
+        if (strcmp(expr, "exit") == 0) {
+            break;
+        }
+
+        if (optimizeConstantFoldOperator(expr)) continue;
+        if (optimize(expr)) continue;
+        optimizeStrengthReduction(expr);
+    }
+
+    return 0;
+}
+                </pre>
+        </div>
+        <div class="expContainer">
+            <h3>Exp8- Assembly Code generator</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+// Structure to hold a three-address code instruction
+struct TAC {
+    char result[10];
+    char arg1[10];
+    char op;
+    char arg2[10];
+};
+
+int main() {
+    struct TAC code[10];
+    int n, i;
+    char reg1[5] = "r1", reg2[5] = "r2";
+
+    printf("Enter number of three-address instructions: ");
+    scanf("%d", &amp;n);
+
+    // Input 3AC in format: result = arg1 op arg2
+    for (i = 0; i &lt; n; i++) {
+        printf("Enter instruction %d (e.g., t0 = a + b): ", i + 1);
+        scanf("%s = %s %c %s", code[i].result, code[i].arg1, &amp;code[i].op, code[i].arg2);
+    }
+
+    printf("\nGenerated Assembly Code:\n");
+
+    for (i = 0; i &lt; n; i++) {
+        printf("LDA %s, %s\n", reg1, code[i].arg1);  // Load arg1 into r1
+        printf("LDA %s, %s\n", reg2, code[i].arg2);  // Load arg2 into r2
+
+        // Generate the appropriate operation instruction
+        switch (code[i].op) {
+            case '+':
+                printf("ADD %s, %s\n", reg2, reg1);
+                break;
+            case '-':
+                printf("SUB %s, %s\n", reg2, reg1);
+                break;
+            case '*':
+                printf("MUL %s, %s\n", reg2, reg1);
+                break;
+            case '/':
+                printf("DIV %s, %s\n", reg2, reg1);
+                break;
+            default:
+                printf("; Unknown operator %c\n", code[i].op);
+                break;
+        }
+
+        printf("STA %s, %s\n", code[i].result, reg2); // Store the result
+    }
+
+    return 0;
+}
+    
+                </pre>
+        </div>
+        <div class="expContainer">
+            <h3>Exp9- LEX</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+tokens.l
+
+%{
+#include &lt;stdio.h&gt;
+%}
+
+%%
+"int"           { printf("Keyword: int\n"); }
+"float"         { printf("Keyword: float\n"); }
+"return"        { printf("Keyword: return\n"); }
+[0-9]+\.[0-9]+  { printf("Float constant: %s\n", yytext); }
+[0-9]+          { printf("Integer constant: %s\n", yytext); }
+[a-zA-Z_][a-zA-Z0-9_]* { printf("Identifier: %s\n", yytext); }
+"="             { printf("Operator: =\n"); }
+"+"             { printf("Operator: +\n"); }
+"{"             { printf("Symbol: {\n"); }
+"}"             { printf("Symbol: }\n"); }
+";"             { printf("Symbol: ;\n"); }
+[ \t\n]+        { /* Ignore whitespace */ }
+.               { printf("Unknown character: %s\n", yytext); }
+%%
+
+int main() {
+    yylex();
+    return 0;
+}
+
+int yywrap()
+{
+return 1;
+}
+    
+                </pre>
+            <pre>
+int main() {
+    int a = 10;
+    float b = 20.5;
+    a = a + b;
+    return 0;
+}
+        </pre>
+            <pre>
+Commands:
+
+lex tokens.l             # Generates lex.yy.c
+gcc lex.yy.c -o lexer # Compile the lexer
+./lexer < input.c         # Run it with input
+        </pre>
+        </div>
+        <div class="expContainer">
+            <h3>
+                Assembly Code generator from Three Address Code(TAC) - ADDITIONAL
+            </h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+typedef struct {
+    char result[5];
+    char arg1[10];
+    char op;
+    char arg2[10];
+} TAC;
+
+char operandStack[50][10];
+int top1 = -1;
+
+char operatorStack[50];
+int top2 = -1;
+
+void pushOperand(char val[]) {
+    strcpy(operandStack[++top1], val);
+}
+
+void popOperand(char val[]) {
+    strcpy(val, operandStack[top1--]);
+}
+
+void pushOperator(char val) {
+    operatorStack[++top2] = val;
+}
+
+char popOperator() {
+    return operatorStack[top2--];
+}
+
+char peekOperator() {
+    return operatorStack[top2];
+}
+
+int precedence(char op) {
+    if (op == '*' || op == '/') return 2;
+    if (op == '+' || op == '-') return 1;
+    return 0;
+}
+
+int isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/';
+}
+
+void generateTACInstruction(char op, TAC tac[], int *count, int *tempCount) {
+    char arg1[10], arg2[10];
+    popOperand(arg2);  
+    popOperand(arg1);
+
+    sprintf(tac[*count].result, "t%d", (*tempCount)++);
+    strcpy(tac[*count].arg1, arg1);
+    strcpy(tac[*count].arg2, arg2);
+    tac[*count].op = op;
+
+    pushOperand(tac[*count].result);  
+    (*count)++;
+}
+
+void generateTAC(char expr[], TAC tac[], int *count) {
+    int i = 0, tempCount = 1;
+
+    while (expr[i] != '\0') {
+        char ch = expr[i];
+
+        if (isspace(ch)) {
+            i++;
+            continue;
+        }
+
+        if (isalpha(ch) || isdigit(ch)) {
+            char op[20];
+            int j = 0;
+            while (isalnum(expr[i])) {
+                op[j++] = expr[i++];
+            }
+            op[j] = '\0';
+            pushOperand(op);
+            continue;  
+        } else if (ch == '(') {
+            pushOperator(ch);
+        } else if (ch == ')') {
+            while (top2 != -1 && peekOperator() != '(') {
+                generateTACInstruction(popOperator(), tac, count, &tempCount);
+            }
+            if (top2 != -1 && peekOperator() == '(')
+                popOperator();
+        } else if (isOperator(ch)) {
+            while (top2 != -1 && peekOperator() != '(' && precedence(peekOperator()) >= precedence(ch)) {
+                generateTACInstruction(popOperator(), tac, count, &tempCount);
+            }
+            pushOperator(ch);
+        }
+
+        i++;
+    }
+
+    while (top2 != -1) {
+        generateTACInstruction(popOperator(), tac, count, &tempCount);
+    }
+}
+void generateAssembly(TAC tac[], int count) {
+    printf("\nAssembly Code:\n");
+    for (int i = 0; i < count; i++) {
+        printf("%s := %s %c %s\n", tac[i].result, tac[i].arg1, tac[i].op, tac[i].arg2);
+        printf("MOV R0, %s\n", tac[i].arg1);
+        switch (tac[i].op) {
+                case '+': printf("ADD R0, %s\n", tac[i].arg2); break;
+                case '-': printf("SUB R0, %s\n", tac[i].arg2); break;
+                case '*': printf("MUL R0, %s\n", tac[i].arg2); break;
+                case '/': printf("DIV R0, %s\n", tac[i].arg2); break;
+            }
+        printf("MOV %s, R0\n\n", tac[i].result);
+    }
+}
+
+void printTAC(TAC tac[], int count) {
+    printf("\nThree-Address Code:\n");
+    for (int i = 0; i < count; i++) {
+        printf("%s := %s %c %s\n", tac[i].result, tac[i].arg1, tac[i].op, tac[i].arg2);
+    }
+}
+
+int main() {
+    char expr[100];
+    TAC tac[50];
+    int count = 0;
+
+    printf("Enter expression (e.g., (a + b) * c):\n");
+    fgets(expr, sizeof(expr), stdin);
+
+    expr[strcspn(expr, "\n")] = '\0';  
+
+    generateTAC(expr, tac, &count);
+    printTAC(tac, count);
+    generateAssembly(tac, count);
+
+    return 0;
+}
+    </pre>
+        </div>
+        <script>
+            function copyCode(button) {
+                const preElement = button.nextElementSibling;
+                const codeToCopy = preElement.innerText;
+                navigator.clipboard.writeText(codeToCopy);
+            }
+        </script>
+        
+    </div>
+</body>
+
+</html>
