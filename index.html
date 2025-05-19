@@ -87,73 +87,56 @@
 <body>
     <div class="mainContainer">
         <div class="expContainer">
-            <h3>Exp1- Token separator</h3>
+            <h3>Exp1- Naive Bayes</h3>
             <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
             <pre>
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-#include &lt;ctype.h&gt;
+import pandas as pd
+from sklearn.naive_bayes import CategoricalNB
 
-#define MAX 100
-
-const char *keywords[] = {"void", "int", "float", "char"};
-int num_keywords = 4;
-
-int isKeyword(char *word) {
-    for (int i = 0; i &lt; num_keywords; i++) {
-        if (strcmp(word, keywords[i]) == 0)
-            return 1;
-    }
-    return 0;
+# Hardcoded dataset with 10 rows
+data = {
+    'Age': ['Teen', 'Adult', 'Senior', 'Adult', 'Teen', 'Senior', 'Adult', 'Teen', 'Senior', 'Adult'],
+    'Gender': ['Male', 'Female', 'Male', 'Female', 'Female', 'Male', 'Female', 'Male', 'Female', 'Male'],
+    'Tooth_Pain': ['Yes', 'No', 'Yes', 'Yes', 'No', 'No', 'Yes', 'No', 'Yes', 'Yes'],
+    'Cavity': ['Yes', 'No', 'Yes', 'No', 'No', 'Yes', 'Yes', 'No', 'Yes', 'No'],
+    'Gum_Disease': ['No', 'No', 'Yes', 'No', 'No', 'Yes', 'No', 'No', 'Yes', 'No'],
+    'Dental_Health': ['Poor', 'Good', 'Poor', 'Good', 'Good', 'Poor', 'Poor', 'Good', 'Poor', 'Good']
 }
 
-int isOperator(char ch) {
-    return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '=' || ch == '%';
-}
+df = pd.DataFrame(data)
 
-int main() {
-    char input[MAX], word[20];
-    int i = 0, j = 0;
+# Prepare training data
+X = pd.get_dummies(df.drop(columns=['Dental_Health']))
+y = df['Dental_Health']
 
-    printf("Enter code: ");
-    fgets(input, sizeof(input), stdin);
+# Train model
+model = CategoricalNB()
+model.fit(X, y)
 
-    while (input[i] != '\0') {
-        if (isalnum(input[i]) || input[i] == '.') {
-            word[j++] = input[i];
-        } else {
-            if (j &gt; 0) {
-                word[j] = '\0';
-                // Check if it's a number
-                int isConstant = 1;
-                for (int k = 0; k &lt; j; k++) {
-                    if (!isdigit(word[k]) &amp;&amp; word[k] != '.') {
-                        isConstant = 0;
-                        break;
-                    }
-                }
+# Ask for user input
+age = input("Enter Age (Teen, Adult, Senior): ")
+gender = input("Enter Gender (Male, Female): ")
+tooth_pain = input("Enter Tooth_Pain (Yes, No): ")
+cavity = input("Enter Cavity (Yes, No): ")
+gum_disease = input("Enter Gum_Disease (Yes, No): ")
 
-                if (isConstant)
-                    printf("%s is a constant\n", word);
-                else if (isKeyword(word))
-                    printf("%s is a keyword\n", word);
-                else
-                    printf("%s is an identifier\n", word);
+# Create input DataFrame
+input_data = pd.DataFrame([{
+    'Age': age,
+    'Gender': gender,
+    'Tooth_Pain': tooth_pain,
+    'Cavity': cavity,
+    'Gum_Disease': gum_disease
+}])
 
-                j = 0;
-            }
+# Encode input the same way as training data
+input_encoded = pd.get_dummies(input_data)
+input_encoded = input_encoded.reindex(columns=X.columns, fill_value=0)
 
-            if (isOperator(input[i])) {
-                printf("%c is an operator\n", input[i]);
-            } else if (strchr(";(){}", input[i])) {
-                printf("%c is a delimiter\n", input[i]);
-            }
-        }
-        i++;
-    }
+# Predict
+prediction = model.predict(input_encoded)[0]
+print(f"\n✅ Predicted Dental Health: {prediction}")
 
-    return 0;
-}
             </pre>
         </div>
         <div class="expContainer">
