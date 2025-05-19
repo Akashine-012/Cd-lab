@@ -258,7 +258,7 @@ print(f"New fruit belongs to cluster: {predicted_cluster}")
             <h3>Genetic Operator</h3>
             <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
             <pre>
-### import random
+import random
 
 # Parent chromosomes (binary strings)
 parent1 = "101010"
@@ -404,6 +404,46 @@ print(f"\nPredicted class for test data [{f1}, {f2}] is: {prediction[0]}")
 
                 </pre>
         </div>
+    <div class="expContainer">
+            <h3>SVM</h3>
+            <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            <pre>
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+
+data = {
+'Age': ['<=30', '<=30', '31-40', '>40', '>40'],
+'Income': ['High', 'High', 'High', 'Medium', 'Low'],
+'Student': ['No', 'No', 'No', 'No', 'Yes'],
+'Credit_Rating': ['Fair', 'Excellent', 'Fair', 'Fair', 'Fair'],
+'Class': ['No', 'No', 'Yes', 'Yes', 'Yes']
+}
+df = pd.DataFrame(data)
+
+df = pd.get_dummies(df, columns=['Age', 'Income', 'Student', 'Credit_Rating'], drop_first=True)
+
+X = df.drop(columns=['Class'])
+y = df['Class']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+dt_model = DecisionTreeClassifier(criterion='entropy', random_state=42)
+dt_model.fit(X_train, y_train)
+
+y_pred = dt_model.predict(X_test)
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+plt.figure(figsize=(10,6))
+plot_tree(dt_model, filled=True, feature_names=X.columns, class_names=['No', 'Yes'])
+plt.show()
+        
+            </pre>
+    </div>
         
         <script>
             function copyCode(button) {
